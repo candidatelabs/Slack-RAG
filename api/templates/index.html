@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slack Digest Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .loading .loading-spinner {
+            display: inline-block;
+        }
+        #statusMessage {
+            display: none;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        #statusMessage.error {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .select2-container {
+            width: 100% !important;
+        }
+        .user-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .user-name {
+            font-weight: bold;
+        }
+        .user-title {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .user-email {
+            font-size: 0.8em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Slack Digest Generator</h1>
+        <form method="POST" action="/">
+            <div class="form-group">
+                <label for="user_select">Select User:</label>
+                <select class="form-control" id="user_select" name="user_email" required>
+                    <option value="">Loading users...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="start_date">Start Date:</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">End Date:</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Generate Digest</button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('#user_select').select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Search for a user...',
+                allowClear: true,
+                ajax: {
+                    url: '/api/users',
+                    dataType: 'json',
+                    delay: 250,
+                    processResults: function(data) {
+                        return {
+                            results: data.map(function(user) {
+                                return {
+                                    id: user.email,
+                                    text: user.name,
+                                    email: user.email,
+                                    title: user.title
+                                };
+                            })
+                        };
+                    },
+                    cache: true
+                },
+                templateResult: formatUser,
+                templateSelection: formatUserSelection
+            });
+
+            function formatUser(user) {
+                if (!user.id) return user.text;
+                
+                return $(`
+                    <div class="user-option">
+                        <div class="user-info">
+                            <div class="user-name">${user.text}</div>
+                            ${user.title ? `<div class="user-title">${user.title}</div>` : ''}
+                            <div class="user-email">${user.email}</div>
+                        </div>
+                    </div>
+                `);
+            }
+
+            function formatUserSelection(user) {
+                if (!user.id) return user.text;
+                return `${user.text} (${user.email})`;
+            }
+        });
+
+        document.getElementById('generateForm').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const form = this;
+            const button = form.querySelector('button[type="submit"]');
+            const buttonText = button.querySelector('.button-text');
+            const statusMessage = document.getElementById('statusMessage');
+            const downloadSection = document.getElementById('downloadSection');
+            const viewLink = document.getElementById('viewLink');
+            const downloadLink = document.getElementById('downloadLink');
+            
+            // Show loading state
+            form.classList.add('loading');
+            button.disabled = true;
+            buttonText.textContent = 'Generating...';
+            statusMessage.style.display = 'block';
+            statusMessage.className = 'alert mt-3 alert-info';
+            statusMessage.textContent = 'Processing Slack channels... This may take a few minutes.';
+            downloadSection.style.display = 'none';
+            
+            // Send the request
+            fetch('/generate', {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => response.json().then(data => ({
+                ok: response.ok,
+                status: response.status,
+                data: data
+            })))
+            .then(({ ok, status, data }) => {
+                if (ok && data.success) {
+                    statusMessage.className = 'alert mt-3 alert-success';
+                    if (data.filename) {
+                        downloadSection.style.display = 'block';
+                        viewLink.href = '/view/' + data.filename;
+                        downloadLink.href = '/download/' + data.filename;
+                    }
+                } else {
+                    statusMessage.className = 'alert mt-3 alert-danger error';
+                    throw new Error(data.message || 'Unknown error occurred');
+                }
+                statusMessage.textContent = data.message;
+            })
+            .catch(error => {
+                statusMessage.className = 'alert mt-3 alert-danger error';
+                statusMessage.textContent = error.message || 'An error occurred while generating the digest.';
+            })
+            .finally(() => {
+                // Reset form state
+                form.classList.remove('loading');
+                button.disabled = false;
+                buttonText.textContent = 'Generate Digest';
+            });
+        };
+
+        // Add date validation
+        document.getElementById('end_date').addEventListener('change', function() {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = this.value;
+            
+            if (startDate && endDate && startDate > endDate) {
+                alert('End date must be after start date');
+                this.value = '';
+            }
+        });
+    </script>
+</body>
+</html> 

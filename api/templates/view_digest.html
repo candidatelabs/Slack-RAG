@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Digest - {{ filename }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .table th {
+            position: sticky;
+            top: 0;
+            background: white;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        }
+        .card-body {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .linkedin-url {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .linkedin-url:hover {
+            text-overflow: clip;
+            white-space: normal;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Digest: {{ filename }}</h1>
+            <div>
+                <a href="/download/{{ filename }}" class="btn btn-outline-success me-2">Download CSV</a>
+                <a href="/" class="btn btn-outline-primary">Back to Home</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                {% if data and data|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Candidate Name</th>
+                                <th>LinkedIn URL</th>
+                                <th>Clients Submitted To</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in data %}
+                            <tr>
+                                <td>{{ entry['Candidate Name'] }}</td>
+                                <td class="linkedin-url">
+                                    {% if entry['LinkedIn URL'] %}
+                                    <a href="{{ entry['LinkedIn URL'] }}" target="_blank">{{ entry['LinkedIn URL'] }}</a>
+                                    {% endif %}
+                                </td>
+                                <td>{{ entry['Clients Submitted To'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    No entries found in this digest.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
