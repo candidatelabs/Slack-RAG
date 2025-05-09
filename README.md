@@ -23,12 +23,12 @@ A Mac application that generates comprehensive candidate pipeline reports from S
    ```
    SLACK_USER_TOKEN=xoxp-your-slack-token
    ANTHROPIC_API_KEY=your-anthropic-api-key
-   ```
+```
 
 ## Running the Application
 
 1. Run the application:
-   ```bash
+```bash
    python slack_digest_app.py
    ```
 
