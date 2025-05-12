@@ -1,11 +1,30 @@
+# Environment variables
 .env
 .env.local
 .env.*.local
+
+# Python
 __pycache__/
 *.pyc
-.DS_Store
+*.pyo
+*.pyd
+.Python
 venv/
+.venv/
+ENV/
+
+# Cache and data
 .cache/
 *.csv
-.vercel 
-.vercel
+client_digest_*.md
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

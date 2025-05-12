@@ -1,54 +1,123 @@
-# Slack Digest Generator
+# Slack Data Analyzer
 
-A Mac application that generates comprehensive candidate pipeline reports from Slack channels.
+A powerful Slack data analysis tool focused on candidate activity, built with PyQt6, SQLite, and AI-powered semantic search.
 
 ## Features
 
-- Native Mac GUI interface
-- Date range selection with calendar popup
-- Real-time progress updates
-- Automatic saving of generated reports
-- Support for multiple timezones
-- Candidate pipeline tracking and reporting
+- Client-centric (channel-centric) analysis
+- Candidate extraction from messages
+- Semantic search using OpenAI embeddings
+- AI-powered summarization using Claude
+- Persistent caching with TTL
+- Rate limiting and exponential backoff
+- Connection pooling
+- Structured logging and metrics
+- Progress tracking and parallel processing
 
 ## Setup
 
-1. Install Python 3.8 or later if you haven't already
-2. Clone this repository
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Create a `.env` file in the project root with your API keys:
-   ```
-   SLACK_USER_TOKEN=xoxp-your-slack-token
-   ANTHROPIC_API_KEY=your-anthropic-api-key
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd slack-digest-experimental
 ```
 
-## Running the Application
+2. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+4. Create a `.env` file with your API keys:
+```env
+SLACK_TOKEN=xoxb-your-token
+OPENAI_API_KEY=sk-your-key
+ANTHROPIC_API_KEY=sk-your-key
+```
+
+5. (Optional) Create a `config.yaml` file for custom settings:
+```yaml
+db:
+  pool_size: 5
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+api:
+  rate_limit_calls: 50
+  rate_limit_period: 60
+  max_retries: 3
+  retry_delay: 1
+
+cache:
+  max_size: 1000
+  ttl: 3600
+
+log_level: INFO
+max_workers: 5
+batch_size: 100
+```
+
+## Usage
 
 1. Run the application:
 ```bash
-   python slack_digest_app.py
-   ```
+python main.py
+```
 
-2. In the application:
-   - Enter your Slack email
-   - Select the date range
-   - Choose your timezone
-   - Click "Generate Digest"
+2. Select a Slack channel to analyze
+3. View candidate activity and associated messages
+4. Generate summaries using Claude
 
-3. The generated report will be saved as a markdown file in the current directory
+## Architecture
 
-## Requirements
+- `config.py`: Configuration management
+- `logger.py`: Structured logging and metrics
+- `database.py`: Database connection pooling
+- `cache.py`: Persistent caching
+- `rate_limiter.py`: API rate limiting
+- `slack_analyzer_core.py`: Core analysis logic
+- `candidate_extractor.py`: Candidate extraction
+- `slack_rag_backend.py`: RAG pipeline
 
-- macOS 10.15 or later
-- Python 3.8 or later
-- Slack User Token with appropriate permissions
-- Anthropic API key
+## Monitoring
 
-## Notes
+Metrics are available at `http://localhost:8000/metrics`:
+- API call counts and latencies
+- Cache hit/miss rates
+- Database operation counts
+- Processing times
 
-- The application requires a Slack User Token with permissions to read channel messages
-- The Anthropic API key is used for generating the candidate pipeline reports
-- Generated reports are saved in markdown format for easy reading and sharing 
+## Development
+
+1. Install development dependencies:
+```bash
+pip install -r requirements-dev.txt
+```
+
+2. Run tests:
+```bash
+pytest
+```
+
+3. Run linting:
+```bash
+flake8
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+MIT License 
