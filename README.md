@@ -2,6 +2,31 @@
 
 A powerful Slack data analysis tool focused on candidate activity, built with PyQt6, SQLite, and AI-powered semantic search.
 
+Effortlessly syncs Slack conversations from key client channels (candidatelabs, candidate-labs) based on user and date range.
+
+Local Data Warehouse (SQLite): All Slack messages, threads, and sync logs are stored locally for blazing-fast retrieval—no more redundant API calls.
+
+Semantic Search Engine (ChromaDB): Every message is transformed into a semantic vector using OpenAI embeddings, allowing deep, context-aware search across conversations.
+
+RAG-Powered Smart Querying: Using Retrieval-Augmented Generation (RAG) with Claude, users can ask any custom question and get responses backed by real Slack history—not just generic AI guesses.
+
+Custom Prompting to query against slack data
+
+
+
+How It Works (High-Level Flow):
+User Inputs: Email + date range → Choose "Force Refresh" or use cached data.
+
+Slack Sync: Fetches all messages and threads from relevant channels → Stored in SQLite.
+
+Semantic Indexing: Every message is embedded with OpenAI embeddings → Indexed in ChromaDB.
+
+Smart Querying: User prompts trigger semantic search → Relevant messages are pulled → Claude provides a context-aware answer.
+
+Lightning-Fast Access: If the data is cached, queries are near-instantaneous.
+
+
+
 ## Features
 
 - Client-centric (channel-centric) analysis
