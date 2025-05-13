@@ -95,8 +95,8 @@ batch_size: 100
 python main.py
 ```
 
-2. Select a Slack channel to analyze
-3. View candidate activity and associated messages
+2. Select timeframe to fetch slack data for
+3. Write a natual language prompt to query the data
 4. Generate summaries using Claude
 
 ## Architecture
